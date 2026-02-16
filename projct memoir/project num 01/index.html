@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ملاعبي - احجز ملعبك ونظم مبارياتك</title>
+    <meta name="description" content="ملاعبي — احجز ملاعب كرة القدم، نظّم مبارياتك، وانضم للاعبين في منطقتك. منصة سهلة وسريعة للحجوزات في الجزائر.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap');
+        
+        * {
+            font-family: 'Cairo', sans-serif;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .field-card {
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .field-image {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(255,255,255,0.95);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .search-box {
+            background: white;
+            border-radius: 50px;
+            padding: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .pulse-dot {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    
+    <!-- Navbar -->
+    <nav role="navigation" aria-label="القائمة الرئيسية" class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-reverse space-x-8">
+                    <div class="flex items-center">
+                        <i class="fas fa-futbol text-3xl text-purple-600 ml-2" aria-hidden="true"></i>
+                        <span class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">ملاعبي</span>
+                    </div>
+                    <div class="hidden md:flex space-x-reverse space-x-6">
+                        <a href="#" class="text-gray-700 hover:text-purple-600 font-semibold">الرئيسية</a>
+                        <a href="#fields" class="text-gray-700 hover:text-purple-600">الملاعب</a>
+                        <a href="#matches" class="text-gray-700 hover:text-purple-600">المباريات</a>
+                        <a href="#how-it-works" class="text-gray-700 hover:text-purple-600">كيف يعمل</a>
+                        <a href="#" class="text-gray-700 hover:text-purple-600">من نحن</a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-reverse space-x-4">
+                    <button type="button" class="text-gray-700 hover:text-purple-600 font-semibold">تسجيل الدخول</button>
+                    <button type="button" class="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 py-2 rounded-full font-semibold hover:shadow-lg transition">
+                        إنشاء حساب
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-gradient text-white py-20">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h1 class="text-5xl font-black mb-6 leading-tight">
+                        احجز ملعبك<br/>
+                        ونظم مبارياتك بسهولة
+                    </h1>
+                    <p class="text-xl mb-8 text-purple-100">
+                        منصة شاملة لحجز ملاعب كرة القدم وتنظيم المباريات الودية. 
+                        ابحث، احجز، والعب - كل شيء في مكان واحد!
+                    </p>
+                    
+                    <!-- Search Box -->
+                    <form role="search" aria-label="بحث عن الملاعب" class="search-box flex items-center space-x-reverse space-x-4">
+                        <div class="flex-1 flex items-center px-4">
+                            <label for="search-location" class="sr-only">المدينة أو الحي</label>
+                            <i class="fas fa-map-marker-alt text-gray-400 ml-2" aria-hidden="true"></i>
+                            <input id="search-location" name="location" type="text" placeholder="المدينة أو الحي" class="w-full py-3 outline-none text-gray-700">
+                        </div>
+                        <div class="flex-1 flex items-center px-4 border-r border-l border-gray-200">
+                            <label for="search-date" class="sr-only">التاريخ</label>
+                            <i class="fas fa-calendar text-gray-400 ml-2" aria-hidden="true"></i>
+                            <input id="search-date" name="date" type="date" class="w-full py-3 outline-none text-gray-700">
+                        </div>
+                        <div class="flex-1 flex items-center px-4">
+                            <label for="search-time" class="sr-only">الوقت</label>
+                            <i class="fas fa-clock text-gray-400 ml-2" aria-hidden="true"></i>
+                            <select id="search-time" name="time" class="w-full py-3 outline-none text-gray-700">
+                                <option value="">الوقت</option>
+                                <option>08:00 - 10:00</option>
+                                <option>10:00 - 12:00</option>
+                                <option>14:00 - 16:00</option>
+                                <option>16:00 - 18:00</option>
+                                <option>18:00 - 20:00</option>
+                                <option>20:00 - 22:00</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-8 py-4 rounded-full font-bold hover:shadow-xl transition">
+                            <i class="fas fa-search ml-2" aria-hidden="true"></i>
+                            ابحث
+                        </button>
+                    </form> 
+                </div>
+                
+                <div class="hidden md:block">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=600" alt="Football field" class="rounded-3xl shadow-2xl" loading="lazy">
+                        <div class="absolute -bottom-6 -right-6 bg-white p-6 rounded-2xl shadow-xl">
+                            <div class="flex items-center space-x-reverse space-x-4">
+                                <div class="bg-green-100 p-4 rounded-full">
+                                    <i class="fas fa-check-circle text-green-600 text-2xl" aria-hidden="true"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">تم الحجز بنجاح</p>
+                                    <p class="font-bold text-gray-800">ملعب النجوم - سطيف</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-4 gap-8 text-center">
+                <div class="card-hover p-6">
+                    <div class="stat-number">250+</div>
+                    <p class="text-gray-600 font-semibold mt-2">ملعب متاح</p>
+                </div>
+                <div class="card-hover p-6">
+                    <div class="stat-number">5000+</div>
+                    <p class="text-gray-600 font-semibold mt-2">حجز شهري</p>
+                </div>
+                <div class="card-hover p-6">
+                    <div class="stat-number">12000+</div>
+                    <p class="text-gray-600 font-semibold mt-2">لاعب نشط</p>
+                </div>
+                <div class="card-hover p-6">
+                    <div class="stat-number">4.8★</div>
+                    <p class="text-gray-600 font-semibold mt-2">تقييم المستخدمين</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Fields Section -->
+    <section id="fields" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-black mb-4">الملاعب المميزة</h2>
+                <p class="text-gray-600 text-lg">اختر من بين أفضل الملاعب في منطقتك</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Field Card 1 -->
+                <div class="field-card bg-white card-hover shadow-lg">
+                    <div class="field-image" style="background-image: url('https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=400');">
+                        <span class="badge text-green-600">
+                            <i class="fas fa-circle pulse-dot text-xs ml-1" aria-hidden="true"></i>
+                            متاح الآن
+                        </span>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xl font-bold">ملعب النجوم</h3>
+                            <span class="text-yellow-500">
+                                <i class="fas fa-star" aria-hidden="true"></i> 4.9
+                            </span>
+                        </div>
+                        <p class="text-gray-600 mb-4 flex items-center">
+                            <i class="fas fa-map-marker-alt text-purple-600 ml-2" aria-hidden="true"></i>
+                            سطيف، حي 1000 مسكن
+                        </p>
+                        <div class="flex items-center justify-between mb-4 text-sm text-gray-500">
+                            <span><i class="fas fa-users ml-1" aria-hidden="true"></i> 5 ضد 5</span>
+                            <span><i class="fas fa-lightbulb ml-1" aria-hidden="true"></i> إضاءة</span>
+                            <span><i class="fas fa-shower ml-1" aria-hidden="true"></i> غرف تغيير</span>
+                        </div>
+                        <div class="flex items-center justify-between pt-4 border-t">
+                            <div>
+                                <span class="text-2xl font-bold text-purple-600">2500 دج</span>
+                                <span class="text-gray-500">/ساعة</span>
+                            </div>
+                            <button type="button" class="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 py-2 rounded-full font-semibold hover:shadow-lg transition">
+                                احجز الآن
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Field Card 2 -->
+                <div class="field-card bg-white card-hover shadow-lg">
+                    <div class="field-image" style="background-image: url('https://images.unsplash.com/photo-1624880357913-a8539238245b?w=400');">
+                        <span class="badge text-orange-600">
+                            <i class="fas fa-fire ml-1" aria-hidden="true"></i>
+                            الأكثر حجزاً
+                        </span>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xl font-bold">ملعب الأبطال</h3>
+                            <span class="text-yellow-500">
+                                <i class="fas fa-star" aria-hidden="true"></i> 4.8
+                            </span>
+                        </div>
+                        <p class="text-gray-600 mb-4 flex items-center">
+                            <i class="fas fa-map-marker-alt text-purple-600 ml-2" aria-hidden="true"></i>
+                            سطيف، حي 500 مسكن
+                        </p>
+                        <div class="flex items-center justify-between mb-4 text-sm text-gray-500">
+                            <span><i class="fas fa-users ml-1" aria-hidden="true"></i> 7 ضد 7</span>
+                            <span><i class="fas fa-lightbulb ml-1" aria-hidden="true"></i> إضاءة</span>
+                            <span><i class="fas fa-car ml-1" aria-hidden="true"></i> موقف سيارات</span>
+                        </div>
+                        <div class="flex items-center justify-between pt-4 border-t">
+                            <div>
+                                <span class="text-2xl font-bold text-purple-600">3500 دج</span>
+                                <span class="text-gray-500">/ساعة</span>
+                            </div>
+                            <button type="button" class="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 py-2 rounded-full font-semibold hover:shadow-lg transition">
+                                احجز الآن
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Field Card 3 -->
+                <div class="field-card bg-white card-hover shadow-lg">
+                    <div class="field-image" style="background-image: url('https://images.unsplash.com/photo-1551958219-acbc608c6377?w=400');">
+                        <span class="badge text-blue-600">
+                            <i class="fas fa-tag ml-1" aria-hidden="true"></i>
+                            عرض خاص
+                        </span>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xl font-bold">ملعب الشباب</h3>
+                            <span class="text-yellow-500">
+                                <i class="fas fa-star" aria-hidden="true"></i> 4.7
+                            </span>
+                        </div>
+                        <p class="text-gray-600 mb-4 flex items-center">
+                            <i class="fas fa-map-marker-alt text-purple-600 ml-2" aria-hidden="true"></i>
+                            سطيف، وسط المدينة
+                        </p>
+                        <div class="flex items-center justify-between mb-4 text-sm text-gray-500">
+                            <span><i class="fas fa-users ml-1" aria-hidden="true"></i> 11 ضد 11</span>
+                            <span><i class="fas fa-lightbulb ml-1" aria-hidden="true"></i> إضاءة</span>
+                            <span><i class="fas fa-coffee ml-1" aria-hidden="true"></i> كافيتيريا</span>
+                        </div>
+                        <div class="flex items-center justify-between pt-4 border-t">
+                            <div>
+                                <span class="text-2xl font-bold text-purple-600">5000 دج</span>
+                                <span class="text-gray-500">/ساعة</span>
+                            </div>
+                            <button type="button" class="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 py-2 rounded-full font-semibold hover:shadow-lg transition">
+                                احجز الآن
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-12">
+                <button type="button" class="border-2 border-purple-600 text-purple-600 px-8 py-3 rounded-full font-bold hover:bg-purple-600 hover:text-white transition">
+                    عرض جميع الملاعب <i class="fas fa-arrow-left mr-2" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Matches Section -->
+    <section id="matches" class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-black mb-4">المباريات القادمة</h2>
+                <p class="text-gray-600 text-lg">انضم إلى المباريات أو أنشئ مباراتك الخاصة</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Match Card 1 -->
+                <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-2xl border border-purple-200 card-hover">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="bg-purple-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                            بحاجة إلى 3 لاعبين
+                        </span>
+                        <span class="text-gray-600 text-sm">
+                            <i class="fas fa-clock ml-1"></i>
+                            اليوم، 18:00
+                        </span>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold mb-3">مباراة ودية - 5 ضد 5</h3>
+                    
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-reverse space-x-3">
+                            <div class="flex -space-x-reverse -space-x-2">
+                                <img src="https://i.pravatar.cc/40?img=1" class="w-10 h-10 rounded-full border-2 border-white" alt="Player" loading="lazy">
+                                <img src="https://i.pravatar.cc/40?img=2" class="w-10 h-10 rounded-full border-2 border-white" alt="Player" loading="lazy">
+                                <img src="https://i.pravatar.cc/40?img=3" class="w-10 h-10 rounded-full border-2 border-white" alt="Player" loading="lazy">
+                            </div>
+                            <span class="text-sm text-gray-600 font-semibold">+7 لاعبين</span>
+                        </div>
+                        <span class="text-sm text-gray-600">
+                            <i class="fas fa-map-marker-alt ml-1 text-purple-600"></i>
+                            ملعب النجوم
+                        </span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between pt-4 border-t border-purple-200">
+                        <div class="text-sm text-gray-600">
+                            <i class="fas fa-wallet ml-1"></i>
+                            250 دج للشخص
+                        </div>
+                        <button type="button" class="bg-purple-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-purple-700 transition">
+                            انضم الآن
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Match Card 2 -->
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl border border-blue-200 card-hover">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                            بحاجة إلى 5 لاعبين
+                        </span>
+                        <span class="text-gray-600 text-sm">
+                            <i class="fas fa-clock ml-1"></i>
+                            غداً، 16:00
+                        </span>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold mb-3">مباراة تحدي - 7 ضد 7</h3>
+                    
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-reverse space-x-3">
+                            <div class="flex -space-x-reverse -space-x-2">
+                                <img src="https://i.pravatar.cc/40?img=4" class="w-10 h-10 rounded-full border-2 border-white" alt="Player" loading="lazy">
+                                <img src="https://i.pravatar.cc/40?img=5" class="w-10 h-10 rounded-full border-2 border-white" alt="Player" loading="lazy">
+                                <img src="https://i.pravatar.cc/40?img=6" class="w-10 h-10 rounded-full border-2 border-white" alt="Player" loading="lazy">
+                            </div>
+                            <span class="text-sm text-gray-600 font-semibold">+9 لاعبين</span>
+                        </div>
+                        <span class="text-sm text-gray-600">
+                            <i class="fas fa-map-marker-alt ml-1 text-blue-600"></i>
+                            ملعب الأبطال
+                        </span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between pt-4 border-t border-blue-200">
+                        <div class="text-sm text-gray-600">
+                            <i class="fas fa-wallet ml-1"></i>
+                            350 دج للشخص
+                        </div>
+                        <button type="button" class="bg-blue-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-blue-700 transition">
+                            انضم الآن
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-8">
+                <button type="button" class="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-8 py-3 rounded-full font-bold hover:shadow-lg transition">
+                    <i class="fas fa-plus ml-2" aria-hidden="true"></i>
+                    أنشئ مباراة جديدة
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-black mb-4">كيف يعمل الموقع؟</h2>
+                <p class="text-gray-600 text-lg">ثلاث خطوات بسيطة للحجز واللعب</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-12">
+                <div class="text-center">
+                    <div class="bg-gradient-to-br from-purple-500 to-purple-700 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                        <span class="text-white text-3xl font-black">1</span>
+                    </div>
+                    <div class="bg-white p-8 rounded-2xl shadow-lg card-hover">
+                        <i class="fas fa-search text-4xl text-purple-600 mb-4" aria-hidden="true"></i>
+                        <h3 class="text-2xl font-bold mb-3">ابحث عن ملعب</h3>
+                        <p class="text-gray-600">اختر المدينة، التاريخ، والوقت المناسب لك من بين مئات الملاعب المتاحة</p>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <div class="bg-gradient-to-br from-purple-500 to-purple-700 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                        <span class="text-white text-3xl font-black">2</span>
+                    </div>
+                    <div class="bg-white p-8 rounded-2xl shadow-lg card-hover">
+                        <i class="fas fa-calendar-check text-4xl text-purple-600 mb-4"></i>
+                        <h3 class="text-2xl font-bold mb-3">احجز مباشرة</h3>
+                        <p class="text-gray-600">اختر الوقت المناسب وادفع أونلاين أو عند الوصول - الحجز فوري ومؤكد</p>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <div class="bg-gradient-to-br from-purple-500 to-purple-700 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                        <span class="text-white text-3xl font-black">3</span>
+                    </div>
+                    <div class="bg-white p-8 rounded-2xl shadow-lg card-hover">
+                        <i class="fas fa-futbol text-4xl text-purple-600 mb-4"></i>
+                        <h3 class="text-2xl font-bold mb-3">العب واستمتع</h3>
+                        <p class="text-gray-600">اذهب للملعب في الوقت المحدد واستمتع بمباراتك مع أصدقائك</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-4xl font-black mb-6">لماذا ملاعبي؟</h2>
+                    <div class="space-y-6">
+                        <div class="flex items-start space-x-reverse space-x-4">
+                            <div class="bg-purple-100 p-3 rounded-lg flex-shrink-0">
+                                <i class="fas fa-shield-alt text-purple-600 text-xl" aria-hidden="true"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg mb-2">حجز مضمون وآمن</h3>
+                                <p class="text-gray-600">نظام دفع آمن وحجز مؤكد فوري مع إمكانية الإلغاء</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-reverse space-x-4">
+                            <div class="bg-purple-100 p-3 rounded-lg flex-shrink-0">
+                                <i class="fas fa-star text-purple-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg mb-2">ملاعب مميزة ومراجعات حقيقية</h3>
+                                <p class="text-gray-600">جميع الملاعب موثقة مع تقييمات من لاعبين حقيقيين</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-reverse space-x-4">
+                            <div class="bg-purple-100 p-3 rounded-lg flex-shrink-0">
+                                <i class="fas fa-users text-purple-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg mb-2">ابحث عن لاعبين</h3>
+                                <p class="text-gray-600">انضم لمباريات موجودة أو ابحث عن لاعبين لفريقك</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-reverse space-x-4">
+                            <div class="bg-purple-100 p-3 rounded-lg flex-shrink-0">
+                                <i class="fas fa-mobile-alt text-purple-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg mb-2">إشعارات فورية</h3>
+                                <p class="text-gray-600">تنبيهات عبر الواتساب والإيميل لكل الحجوزات والمباريات</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <img src="https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=300" class="rounded-2xl shadow-lg" alt="Football" loading="lazy">
+                    <img src="https://images.unsplash.com/photo-1606925797300-0b35e9d1794e?w=300" class="rounded-2xl shadow-lg mt-8" alt="Football" loading="lazy">
+                    <img src="https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=300" class="rounded-2xl shadow-lg -mt-8" alt="Football" loading="lazy">
+                    <img src="https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?w=300" class="rounded-2xl shadow-lg" alt="Football" loading="lazy">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="hero-gradient text-white py-20">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-4xl font-black mb-6">جاهز للعب؟</h2>
+            <p class="text-xl mb-8 text-purple-100">انضم لآلاف اللاعبين واحجز ملعبك الآن</p>
+            <div class="flex items-center justify-center space-x-reverse space-x-4">
+                <button type="button" class="bg-white text-purple-600 px-8 py-4 rounded-full font-bold text-lg hover:shadow-2xl transition">
+                    ابدأ الآن مجاناً
+                </button>
+                <button type="button" class="border-2 border-white text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white hover:text-purple-600 transition">
+                    تعرف على المزيد
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-futbol text-2xl text-purple-400 ml-2"></i>
+                        <span class="text-xl font-bold">ملاعبي</span>
+                    </div>
+                    <p class="text-gray-400">منصتك الأولى لحجز ملاعب كرة القدم وتنظيم المباريات في الجزائر</p>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold mb-4">روابط سريعة</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-purple-400">من نحن</a></li>
+                        <li><a href="#" class="hover:text-purple-400">الملاعب</a></li>
+                        <li><a href="#" class="hover:text-purple-400">المباريات</a></li>
+                        <li><a href="#" class="hover:text-purple-400">المدونة</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold mb-4">الدعم</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-purple-400">مركز المساعدة</a></li>
+                        <li><a href="#" class="hover:text-purple-400">الأسئلة الشائعة</a></li>
+                        <li><a href="#" class="hover:text-purple-400">شروط الاستخدام</a></li>
+                        <li><a href="#" class="hover:text-purple-400">سياسة الخصوصية</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold mb-4">تابعنا</h3>
+                    <div class="flex space-x-reverse space-x-4">
+                        <a href="#" aria-label="Facebook" class="bg-gray-800 p-3 rounded-full hover:bg-purple-600 transition">
+                            <i class="fab fa-facebook" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" aria-label="Instagram" class="bg-gray-800 p-3 rounded-full hover:bg-purple-600 transition">
+                            <i class="fab fa-instagram" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" aria-label="Twitter" class="bg-gray-800 p-3 rounded-full hover:bg-purple-600 transition">
+                            <i class="fab fa-twitter" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" aria-label="YouTube" class="bg-gray-800 p-3 rounded-full hover:bg-purple-600 transition">
+                            <i class="fab fa-youtube" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 ملاعبي. جميع الحقوق محفوظة | صُمم بـ <i class="fas fa-heart text-red-500"></i> في الجزائر</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
