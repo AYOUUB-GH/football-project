@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JustPlay – Find Fields, Join Matches</title>
+  <meta name="description" content="Connect with local football stadiums and players. Find available fields, join matches, and organize your next game with JustPlay.">
+  <meta name="theme-color" content="#0a0f0a">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Teko:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <a class="skip-link" href="#app">Skip to main content</a>
+
+<!-- Sidebar (responsive) -->
+<aside class="sidebar" id="sidebar" aria-label="Main navigation">
+  <div class="sidebar-inner">
+    <div class="sidebar-brand">JustPlay</div>
+    <nav class="sidebar-nav" role="navigation" aria-label="Primary">
+      <button type="button" class="sidebar-link" data-page="home" onclick="navigateTo('home'); closeSidebar();">🏠 Home</button>
+      <button type="button" class="sidebar-link" data-page="map" onclick="navigateTo('map'); closeSidebar();">📍 Map</button>
+      <button type="button" class="sidebar-link" data-page="matches" onclick="navigateTo('matches'); closeSidebar();">⚽ Matches</button>
+      <button type="button" class="sidebar-link" data-page="profile" onclick="navigateTo('profile'); closeSidebar();">👤 Profile</button>
+      <button type="button" class="sidebar-link" id="sidebar-login-btn" onclick="navigateTo('login'); closeSidebar();" style="display: none;">🔐 Login</button>
+    </nav>
+    <div class="sidebar-footer">© JustPlay</div>
+  </div>
+  </aside>
+
+  <button class="sidebar-toggle" id="sidebar-toggle" aria-controls="sidebar" aria-expanded="false" aria-label="Open menu">☰</button>
+  <div class="sidebar-backdrop" id="sidebar-backdrop" tabindex="-1" aria-hidden="true"></div>
+
+<div id="app" role="main" tabindex="-1">
+
+  <!-- ===================== HOME PAGE ===================== -->
+  <div id="page-home" class="page active">
+    
+    <div class="home-hero">
+    <div class="hero-ball" aria-hidden="true">⚽</div>
+      <p class="hero-greeting">Welcome back, Player!</p>
+      <h1 class="hero-title">Find Your <span class="highlight">Perfect Pitch</span></h1>
+      <p class="hero-subtitle">Book stadiums, join matches, and connect with players near you.</p>
+    </div>
+
+    <div class="action-grid">
+      <div class="action-card" id="action-find-stadiums" onclick="navigateTo('map')">
+        <div class="action-icon green">🏟️</div>
+        <div class="action-card-title">Find Stadiums</div>
+        <div class="action-card-desc">Discover nearby fields</div>
+      </div>
+      <div class="action-card" id="action-join-match" onclick="navigateTo('matches')">
+        <div class="action-icon gold">⚽</div>
+        <div class="action-card-title">Join a Match</div>
+        <div class="action-card-desc">Find open games</div>
+      </div>
+      <div class="action-card" id="action-create-match" onclick="openCreateMatchModal()">
+        <div class="action-icon blue">➕</div>
+        <div class="action-card-title">Create Match</div>
+        <div class="action-card-desc">Organize your game</div>
+      </div>
+      <div class="action-card" id="action-my-matches" onclick="navigateTo('matches'); setMatchTab('my')">
+        <div class="action-icon red">📋</div>
+        <div class="action-card-title">My Matches</div>
+        <div class="action-card-desc">View your schedule</div>
+      </div>
+    </div>
+
+    <!-- Featured Stadiums -->
+    <div class="section">
+      <div class="section-header">
+        <h2 class="section-title">⭐ Featured Fields</h2>
+        <span class="section-link" onclick="navigateTo('map')">See All →</span>
+      </div>
+      <div class="stadium-carousel" id="featured-stadiums">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Upcoming Matches Preview -->
+    <div class="section">
+      <div class="section-header">
+        <h2 class="section-title">🔥 Upcoming Matches</h2>
+        <span class="section-link" onclick="navigateTo('matches')">See All →</span>
+      </div>
+      <div id="home-matches">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===================== MAP PAGE ===================== -->
+  <div id="page-map" class="page">
+    <div class="page-header">
+      <h1 class="page-title">📍 Explore Stadiums</h1>
+    </div>
+
+    <div class="map-search">
+      <div class="search-input-wrapper">
+        <span class="search-icon" aria-hidden="true">🔍</span>
+        <label class="visually-hidden" for="map-search-input">Search stadiums</label>
+        <input type="text" class="search-input" id="map-search-input" placeholder="Search stadiums..." oninput="filterStadiums(this.value)">
+      </div>
+    </div>
+
+    <div class="map-container">
+      <div id="map"></div>
+    </div>
+
+    <div class="stadium-list-compact" id="stadium-list">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+
+  <!-- ===================== STADIUM DETAIL PAGE ===================== -->
+  <div id="page-stadium-detail" class="page">
+    <div class="stadium-detail-hero">
+      <button type="button" class="back-btn-float" onclick="goBack()">←</button>
+      <img class="stadium-hero-img" id="stadium-detail-img" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Stadium">
+    </div>
+    
+    <div class="stadium-detail-content">
+      <h1 class="stadium-detail-name" id="stadium-detail-name">Stadium details</h1>
+      <div class="stadium-detail-address" id="stadium-detail-address">
+        <span>📍</span> <span id="stadium-address-text"></span>
+      </div>
+
+      <div class="detail-stats">
+        <div class="stat-card">
+          <div class="stat-value" id="stadium-detail-price"></div>
+          <div class="stat-label">Per Hour</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stadium-detail-rating"></div>
+          <div class="stat-label">Rating</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stadium-detail-surface"></div>
+          <div class="stat-label">Surface</div>
+        </div>
+      </div>
+
+      <h3 class="match-section-title">🕐 Available Time Slots</h3>
+      <div class="time-slots" id="stadium-time-slots">
+        <!-- Rendered by JS -->
+      </div>
+
+      <h3 class="match-section-title">✨ Amenities</h3>
+      <div class="amenities-grid" id="stadium-amenities">
+        <!-- Rendered by JS -->
+      </div>
+
+      <h3 class="match-section-title">📍 Location</h3>
+      <div class="mini-map" id="stadium-mini-map"></div>
+
+      <button type="button" class="btn btn-primary btn-lg btn-block" id="book-stadium-btn" onclick="bookStadium()">
+        ⚡ Book Now
+      </button>
+    </div>
+  </div>
+
+  <!-- ===================== MATCHES PAGE ===================== -->
+  <div id="page-matches" class="page">
+    <div class="page-header">
+      <h1 class="page-title">⚽ Matches</h1>
+    </div>
+
+    <div class="tab-bar" id="match-tabs">
+      <div class="tab-item active" data-tab="all" onclick="setMatchTab('all')">All Matches</div>
+      <div class="tab-item" data-tab="open" onclick="setMatchTab('open')">Open</div>
+      <div class="tab-item" data-tab="my" onclick="setMatchTab('my')">My Matches</div>
+      <div class="tab-item" data-tab="past" onclick="setMatchTab('past')">Past</div>
+    </div>
+
+    <div class="px-5">
+      <div id="matches-list">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <div class="px-5 mt-4">
+      <button type="button" class="btn btn-primary btn-lg btn-block" onclick="openCreateMatchModal()">
+        ➕ Create a New Match
+      </button>
+    </div>
+  </div>
+
+  <!-- ===================== MATCH DETAIL PAGE ===================== -->
+  <div id="page-match-detail" class="page">
+    <div class="page-header">
+      <button type="button" class="back-btn" onclick="goBack()">←</button>
+      <h1 class="page-title">Match Details</h1>
+    </div>
+
+    <div class="match-detail-header">
+      <h2 class="match-detail-title" id="match-detail-title">Match details</h2>
+      <div class="match-detail-meta" id="match-detail-meta">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <div class="match-detail-content">
+      <div class="match-section">
+        <h3 class="match-section-title">🏟️ Stadium</h3>
+        <div class="stadium-list-item" id="match-stadium-info" onclick="openStadiumFromMatch()">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <div class="match-section">
+        <h3 class="match-section-title">📍 Location</h3>
+        <div class="mini-map" id="match-mini-map"></div>
+      </div>
+
+      <div class="match-section">
+        <h3 class="match-section-title">📜 Match Rules</h3>
+        <div class="rules-list" id="match-rules">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <div class="match-section">
+        <h3 class="match-section-title">👥 Players (<span id="match-player-count"></span>)</h3>
+        <div class="players-grid" id="match-players-grid">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-primary btn-lg btn-block" id="join-match-btn" onclick="joinMatch()">
+        ⚡ Join This Match
+      </button>
+    </div>
+  </div>
+
+  <!-- ===================== PROFILE PAGE ===================== -->
+  <div id="page-profile" class="page">
+    <div class="profile-hero">
+      <div class="profile-avatar" id="profile-avatar">AK</div>
+      <h1 class="profile-name" id="profile-name">Ahmed Khalil</h1>
+      <div class="profile-role">⚽ Player & Organizer</div>
+      <div class="profile-stats">
+        <div class="profile-stat">
+          <div class="profile-stat-value" id="profile-matches-played">24</div>
+          <div class="profile-stat-label">Matches</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-value" id="profile-wins">18</div>
+          <div class="profile-stat-label">Wins</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-value" id="profile-goals">47</div>
+          <div class="profile-stat-label">Goals</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-menu">
+      <div class="profile-menu-item" onclick="showSection('edit-profile')">
+        <div class="profile-menu-icon">✏️</div>
+        <div class="profile-menu-text">
+          <div class="profile-menu-title">Edit Profile</div>
+          <div class="profile-menu-desc">Update your info & photo</div>
+        </div>
+        <span class="profile-menu-arrow">›</span>
+      </div>
+      <div class="profile-menu-item" onclick="navigateTo('matches'); setMatchTab('my');">
+        <div class="profile-menu-icon">📅</div>
+        <div class="profile-menu-text">
+          <div class="profile-menu-title">Upcoming Matches</div>
+          <div class="profile-menu-desc">View your schedule</div>
+        </div>
+        <span class="profile-menu-arrow">›</span>
+      </div>
+      <div class="profile-menu-item" id="owner-dashboard-menu-item" onclick="showSection('owner-dashboard')" style="display: none;">
+        <div class="profile-menu-icon">🏟️</div>
+        <div class="profile-menu-text">
+          <div class="profile-menu-title">Owner Dashboard</div>
+          <div class="profile-menu-desc">Manage your stadiums</div>
+        </div>
+        <span class="profile-menu-arrow">›</span>
+      </div>
+      <div class="profile-menu-item" onclick="showSection('notifications')">
+        <div class="profile-menu-icon">🔔</div>
+        <div class="profile-menu-text">
+          <div class="profile-menu-title">Notifications</div>
+          <div class="profile-menu-desc">Match updates & reminders</div>
+        </div>
+        <span class="profile-menu-arrow">›</span>
+      </div>
+      <div class="profile-menu-item" onclick="showSection('settings')">
+        <div class="profile-menu-icon">⚙️</div>
+        <div class="profile-menu-text">
+          <div class="profile-menu-title">Settings</div>
+          <div class="profile-menu-desc">Preferences & account</div>
+        </div>
+        <span class="profile-menu-arrow">›</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== OWNER DASHBOARD PAGE ===================== -->
+  <div id="page-owner-dashboard" class="page">
+    <div class="page-header">
+      <button type="button" class="back-btn" onclick="goBack()">←</button>
+      <h1 class="page-title">🏟️ Owner Dashboard</h1>
+    </div>
+
+    <div class="dashboard-stats">
+      <div class="dash-stat green">
+        <div class="dash-stat-icon">🏟️</div>
+        <div class="dash-stat-value">3</div>
+        <div class="dash-stat-label">My Stadiums</div>
+      </div>
+      <div class="dash-stat gold">
+        <div class="dash-stat-icon">📅</div>
+        <div class="dash-stat-value">12</div>
+        <div class="dash-stat-label">Reservations</div>
+      </div>
+      <div class="dash-stat blue">
+        <div class="dash-stat-icon">💰</div>
+        <div class="dash-stat-value">$840</div>
+        <div class="dash-stat-label">This Month</div>
+      </div>
+      <div class="dash-stat red">
+        <div class="dash-stat-icon">⭐</div>
+        <div class="dash-stat-value">4.8</div>
+        <div class="dash-stat-label">Avg Rating</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <h2 class="section-title">My Stadiums</h2>
+        <button type="button" class="btn btn-secondary" onclick="openAddStadiumModal()">+ Add New</button>
+      </div>
+      <div id="owner-stadiums">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <h2 class="section-title">Upcoming Reservations</h2>
+      </div>
+      <div id="owner-reservations">
+        <div class="reservation-card">
+          <div class="reservation-info">
+            <div class="reservation-name">Mohammed S. — 5v5 Match</div>
+            <div class="reservation-time">📅 Feb 15, 2026 • 6:00 PM – 8:00 PM</div>
+          </div>
+          <div class="reservation-badge confirmed">Confirmed</div>
+        </div>
+        <div class="reservation-card">
+          <div class="reservation-info">
+            <div class="reservation-name">Youssef A. — Training Session</div>
+            <div class="reservation-time">📅 Feb 16, 2026 • 4:00 PM – 5:30 PM</div>
+          </div>
+          <div class="reservation-badge confirmed">Confirmed</div>
+        </div>
+        <div class="reservation-card">
+          <div class="reservation-info">
+            <div class="reservation-name">Khalid M. — Evening Match</div>
+            <div class="reservation-time">📅 Feb 17, 2026 • 7:00 PM – 9:00 PM</div>
+          </div>
+          <div class="reservation-badge pending">Pending</div>
+        </div>
+        <div class="reservation-card">
+          <div class="reservation-info">
+            <div class="reservation-name">Ali R. — Weekend Game</div>
+            <div class="reservation-time">📅 Feb 18, 2026 • 10:00 AM – 12:00 PM</div>
+          </div>
+          <div class="reservation-badge pending">Pending</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== NOTIFICATIONS PAGE ===================== -->
+  <div id="page-notifications" class="page">
+    <div class="page-header">
+      <button type="button" class="back-btn" onclick="goBack()">←</button>
+      <h1 class="page-title">🔔 Notifications</h1>
+    </div>
+
+    <div class="px-5">
+      <div class="notification-card unread">
+        <div class="notification-icon-wrapper success">✅</div>
+        <div class="notification-text">
+          <div class="notification-title">Match Confirmed!</div>
+          <div class="notification-desc">Your match "Sunday Showdown" at Green Valley Arena has been confirmed.</div>
+          <div class="notification-time">2 min ago</div>
+        </div>
+        <div class="unread-dot"></div>
+      </div>
+
+      <div class="notification-card unread">
+        <div class="notification-icon-wrapper warning">⚠️</div>
+        <div class="notification-text">
+          <div class="notification-title">Match Starting Soon</div>
+          <div class="notification-desc">"Evening Kickoff" starts in 1 hour at City Football Park. Don't forget your gear!</div>
+          <div class="notification-time">15 min ago</div>
+        </div>
+        <div class="unread-dot"></div>
+      </div>
+
+      <div class="notification-card">
+        <div class="notification-icon-wrapper info">👥</div>
+        <div class="notification-text">
+          <div class="notification-title">New Player Joined</div>
+          <div class="notification-desc">Omar K. has joined your match "Friday Night Football".</div>
+          <div class="notification-time">1 hour ago</div>
+        </div>
+      </div>
+
+      <div class="notification-card">
+        <div class="notification-icon-wrapper success">🏟️</div>
+        <div class="notification-text">
+          <div class="notification-title">Booking Successful</div>
+          <div class="notification-desc">You've booked "Al-Noor Stadium" for Feb 20 at 5:00 PM.</div>
+          <div class="notification-time">3 hours ago</div>
+        </div>
+      </div>
+
+      <div class="notification-card">
+        <div class="notification-icon-wrapper warning">📢</div>
+        <div class="notification-text">
+          <div class="notification-title">Price Update</div>
+          <div class="notification-desc">Royal Arena has updated their hourly rate to $35/hr for weekends.</div>
+          <div class="notification-time">Yesterday</div>
+        </div>
+      </div>
+
+      <div class="notification-card">
+        <div class="notification-icon-wrapper info">⭐</div>
+        <div class="notification-text">
+          <div class="notification-title">Rate Your Experience</div>
+          <div class="notification-desc">How was your match at Elite Sports Complex? Leave a review!</div>
+          <div class="notification-time">2 days ago</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== EDIT PROFILE PAGE ===================== -->
+  <div id="page-edit-profile" class="page">
+    <div class="page-header">
+      <button type="button" class="back-btn" onclick="goBack()">←</button>
+      <h1 class="page-title">Edit Profile</h1>
+    </div>
+
+    <div class="px-5">
+      <div class="text-center mb-6">
+          <div class="profile-avatar mx-auto mb-3" id="edit-profile-avatar" aria-label="Edit profile avatar">AK</div>
+        <input type="file" id="edit-photo-input" accept="image/*" hidden>
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('edit-photo-input').click()">📷 Change Photo</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="edit-name">Full Name</label>
+          <input type="text" class="form-input" value="Ahmed Khalil" id="edit-name">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="edit-email">Email</label>
+          <input type="email" class="form-input" value="ahmed@example.com" id="edit-email">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="edit-phone">Phone</label>
+          <input type="tel" class="form-input" value="+966 55 123 4567" id="edit-phone">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="edit-position">Position</label>
+          <select class="form-select" id="edit-position">
+          <option>Striker</option>
+          <option>Midfielder</option>
+          <option selected>Defender</option>
+          <option>Goalkeeper</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="edit-bio">Bio</label>
+          <textarea class="form-input" rows="3" id="edit-bio" placeholder="Tell us about yourself...">Love playing weekend football. Available most evenings.</textarea>
+      </div>
+
+      <button type="button" class="btn btn-primary btn-lg btn-block" onclick="saveProfile()">💾 Save Changes</button>
+    </div>
+  </div>
+
+  <!-- ===================== SETTINGS PAGE ===================== -->
+  <div id="page-settings" class="page">
+    <div class="page-header">
+      <button class="back-btn" onclick="goBack()">←</button>
+      <h1 class="page-title">⚙️ Settings</h1>
+    </div>
+
+    <div class="px-5">
+      <h3 class="match-section-title mb-4">Notifications</h3>
+      <div class="switch-row">
+        <span class="switch-label">Match Reminders</span>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="switch-row">
+        <span class="switch-label">New Match Alerts</span>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="switch-row">
+        <span class="switch-label">Booking Confirmations</span>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <h3 class="match-section-title mb-4">Preferences</h3>
+      <div class="switch-row">
+        <span class="switch-label">Dark Mode</span>
+        <div id="dark-mode-toggle" class="toggle" role="switch" aria-checked="false"></div>
+      </div>
+      <div class="switch-row">
+        <span class="switch-label">Location Services</span>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <h3 class="match-section-title mb-4">Account</h3>
+      <div class="profile-menu-item">
+        <div class="profile-menu-icon">🔒</div>
+        <div class="profile-menu-text">
+          <div class="profile-menu-title">Change Password</div>
+        </div>
+        <span class="profile-menu-arrow"></span>
+      </div>
+      <div class="profile-menu-item">
+        <div class="profile-menu-icon">🌍</div>
+        <div class="profile-menu-text">
+          <div class="profile-menu-title">Language</div>
+          <div class="profile-menu-desc">English</div>
+        </div>
+        <span class="profile-menu-arrow">›</span>
+      </div>
+      <div class="profile-menu-item" onclick="navigateTo('login')">
+        <div class="profile-menu-icon">🔐</div>
+        <div class="profile-menu-text">
+          <div class="profile-menu-title">Login / Register</div>
+        </div>
+        <span class="profile-menu-arrow">›</span>
+      </div>
+      <div class="profile-menu-item danger-item" onclick="logout()">
+        <div class="profile-menu-icon">🚪</div>
+        <div class="profile-menu-text">
+          <div class="profile-menu-title">Log Out</div>
+        </div>
+        <span class="profile-menu-arrow">›</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== LOGIN PAGE ===================== -->
+  <div id="page-login" class="page">
+    <div class="page-header">
+      <button type="button" class="back-btn" onclick="goBack()">←</button>
+      <h1 class="page-title">🔐 Login / Register</h1>
+    </div>
+
+    <div class="px-5 mt-4">
+      <div class="form-group">
+        <label class="form-label" for="login-username">Full Name</label>
+        <input type="text" class="form-input" id="login-username" placeholder="e.g. Ahmed Khalil">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="login-phone">Phone Number</label>
+        <input type="tel" class="form-input" id="login-phone" placeholder="+966 55 123 4567">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="login-age">Age</label>
+        <input type="number" class="form-input" id="login-age" placeholder="e.g. 25">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="login-position">Playing Position</label>
+        <select class="form-select" id="login-position">
+          <option value="">Select Position...</option>
+          <option value="Goalkeeper">Goalkeeper</option>
+          <option value="Defender">Defender</option>
+          <option value="Midfielder">Midfielder</option>
+          <option value="Attacker">Attacker</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="login-skill">Skill Level</label>
+        <select class="form-select" id="login-skill">
+          <option value="">Select Level...</option>
+          <option value="Beginner">Beginner</option>
+          <option value="Intermediate">Intermediate</option>
+          <option value="Advanced">Advanced</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Profile Photo</label>
+        <div class="d-flex align-items-center gap-3">
+          <div class="profile-avatar" id="login-avatar-preview" style="width: 50px; height: 50px; font-size: 1rem;">📷</div>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('login-photo-input').click()">Upload Photo</button>
+          <input type="file" id="login-photo-input" accept="image/*" hidden>
+        </div>
+      </div>
+
+      <div class="d-flex gap-3 mt-5">
+        <button type="button" class="btn btn-primary btn-lg btn-block" onclick="submitLogin()">🚀 Enter</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- End #app -->
+
+<!-- ===================== CREATE MATCH MODAL ===================== -->
+<div class="modal-overlay" id="create-match-modal" aria-hidden="true">
+  <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="create-match-title" tabindex="-1">
+    <div class="modal-handle"></div>
+    <h2 class="modal-title" id="create-match-title">⚽ Create a Match</h2>
+
+    <div class="form-group">
+      <label class="form-label" for="new-match-title">Match Title</label>
+      <input type="text" class="form-input" id="new-match-title" placeholder="e.g. Sunday Showdown">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="new-match-stadium">Stadium</label>
+      <select class="form-select" id="new-match-stadium">
+        <option value="">Select a stadium...</option>
+        <!-- Populated by JS -->
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="new-match-date">Date</label>
+      <input type="date" class="form-input" id="new-match-date">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="new-match-time">Time</label>
+      <input type="time" class="form-input" id="new-match-time">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="new-match-players">Max Players</label>
+      <select class="form-select" id="new-match-players">
+        <option value="10">5 vs 5 (10 players)</option>
+        <option value="14">7 vs 7 (14 players)</option>
+        <option value="22">11 vs 11 (22 players)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="new-match-fee">Entry Fee (optional)</label>
+      <input type="number" class="form-input" id="new-match-fee" placeholder="$0">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Invite Friends</label>
+      <div id="new-match-friends" style="max-height: 150px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.2);"></div>
+    </div>
+
+    <div class="d-flex gap-3 mt-4">
+      <button type="button" class="btn btn-secondary flex-1" onclick="closeCreateMatchModal()">Cancel</button>
+      <button type="button" class="btn btn-primary flex-2" onclick="createMatch()">🎯 Create Match</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== ADD STADIUM MODAL ===================== -->
+<div class="modal-overlay" id="add-stadium-modal" aria-hidden="true">
+  <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="add-stadium-title" tabindex="-1">
+    <div class="modal-handle"></div>
+    <h2 class="modal-title" id="add-stadium-title">🏟️ Add New Stadium</h2>
+
+    <div class="form-group">
+      <label class="form-label" for="new-stadium-name">Stadium Name</label>
+      <input type="text" class="form-input" id="new-stadium-name" placeholder="e.g. Royal Arena">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="new-stadium-address">Address</label>
+      <input type="text" class="form-input" id="new-stadium-address" placeholder="Full address">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="new-stadium-price">Price per Hour ($)</label>
+      <input type="number" class="form-input" id="new-stadium-price" placeholder="30">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="new-stadium-surface">Surface Type</label>
+      <select class="form-select" id="new-stadium-surface">
+        <option>Natural Grass</option>
+        <option>Artificial Turf</option>
+        <option>Indoor</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="new-stadium-desc">Description</label>
+      <textarea class="form-input" rows="3" id="new-stadium-desc" placeholder="Describe your stadium..."></textarea>
+    </div>
+
+    <div class="d-flex gap-3 mt-4">
+      <button type="button" class="btn btn-secondary flex-1" onclick="closeAddStadiumModal()">Cancel</button>
+      <button type="button" class="btn btn-primary flex-2" onclick="addStadium()">🏟️ Add Stadium</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== TOAST ===================== -->
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true">
+  <span class="toast-icon" id="toast-icon" aria-hidden="true">✅</span>
+  <span id="toast-message">Success!</span>
+</div>
+
+<!-- ===================== BOTTOM NAV ===================== -->
+<nav class="bottom-nav" id="bottom-nav" role="navigation" aria-label="Primary navigation">
+  <button type="button" class="nav-item active" data-page="home" onclick="navigateTo('home')">
+    <span class="nav-icon">🏠</span>
+    <span class="nav-label">Home</span>
+  </button>
+  <button type="button" class="nav-item" data-page="map" onclick="navigateTo('map')">
+    <span class="nav-icon">📍</span>
+    <span class="nav-label">Map</span>
+  </button>
+  <button type="button" class="nav-item" data-page="matches" onclick="navigateTo('matches')">
+    <span class="nav-icon">⚽</span>
+    <span class="nav-label">Matches</span>
+  </button>
+  <button type="button" class="nav-item" data-page="profile" onclick="navigateTo('profile')">
+    <span class="nav-icon">👤</span>
+    <span class="nav-label">Profile</span>
+  </button>
+</nav>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
